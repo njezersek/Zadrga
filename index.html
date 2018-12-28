@@ -4,11 +4,12 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>Document</title>
+	<title>Zadrga</title>
 	<style>
 		body{
 			margin: 0;
 			overflow: hidden;
+			background: #f7b731;
 		}
 	</style>
 </head>
@@ -18,52 +19,47 @@
 		let c = document.getElementById("zadrga");
 		let ctx = c.getContext("2d");
 
-		let size = 100;
+		let size = 50;
 		let position = 500;
 		let w, h;
 
 		function resize(){
 			w = c.width = window.innerWidth;
 			h = c.height = window.innerHeight;
-
+			size = Math.min(w,h)/20;
 			render();
 		}
 
 		function render(){
+			//position = 1400;
 			ctx.clearRect(0,0,w,h);
 
 			// pobarvaj ozadje
-			ctx.fillStyle = "#447693"
+			ctx.fillStyle = "#2bcbba"
 			ctx.beginPath();
-			ctx.arc(0, position, w/2, Math.PI, 2*Math.PI);
+			let margin = Math.sqrt(4*(size*size)/8);
+			ctx.arc(0, position, w/2-margin, Math.PI, 2*Math.PI);
 			ctx.fill();
 			ctx.beginPath();
-			ctx.arc(w, position, w/2, Math.PI, 2*Math.PI);
+			ctx.arc(w, position, w/2-margin, Math.PI, 2*Math.PI);
 			ctx.fill();
 			ctx.fillRect(0,position, w, h-position);
 
 			let n;
 
 			ctx.lineWidth = size/2;
-			// narisi zobcke zadrge na ravnem delu
+			ctx.lineCap = "round";
+			// narisi toothcke zadrge na ravnem delu
 			n = Math.ceil((h-position)/size);
 			for(let i=0; i<n; i++){
 				// leva stran
-				ctx.strokeStyle = "#22a0d6";
-				ctx.beginPath();
-				ctx.moveTo(w/2 - size, h - size*i);
-				ctx.lineTo(w/2 + size, h - size*i);
-				ctx.stroke();
+				tooth(w/2, h - size*i, Math.PI/2);
 
 				//desna stran
-				ctx.strokeStyle = "#1885b4";
-				ctx.beginPath();
-				ctx.moveTo(w/2 - size, h - size*(i+.5));
-				ctx.lineTo(w/2 + size, h - size*(i+.5));
-				ctx.stroke();
+				tooth(w/2, h - size*(i+.5), -Math.PI/2);
 			}
 
-			// narisi zobcke zadrge na kroznem delu
+			// narisi toothcke zadrge na kroznem delu
 			let clx = 0;
 			let cly = position;
 			let crx = w;
@@ -73,25 +69,41 @@
 			let angleOffset = offeset/r;
 			n = (Math.PI*r)/size;
 			for(let i=0; i<n; i++){
-				let angle = Math.PI/2+(Math.PI/n)*i + angleOffset;
 				//leva stran
-				ctx.strokeStyle = "#22a0d6";
+				let angle = Math.PI/2+(Math.PI/n)*i + angleOffset;
 				let sin = Math.sin(angle);
 				let cos = Math.cos(angle);
-				ctx.beginPath();
-				ctx.moveTo(sin*(r-size) + clx, cos*(r-size) + cly);
-				ctx.lineTo(sin*(r+size) + clx, cos*(r+size) + cly);
-				ctx.stroke();
+				tooth(sin*(r)+clx, cos*(r)+cly, angle);
+
 				//desna stran
-				ctx.strokeStyle = "#1885b4";
 				angle = Math.PI/2+(Math.PI/n)*(i+.5) + angleOffset;
 				sin = Math.sin(-angle);
 				cos = Math.cos(-angle);
-				ctx.beginPath();
-				ctx.moveTo(sin*(r-size) + crx, cos*(r-size) + cry);
-				ctx.lineTo(sin*(r+size) + crx, cos*(r+size) + cry);
-				ctx.stroke();
+				tooth(sin*(r)+crx, cos*(r)+cry, -angle);
 			}
+		}
+
+		function tooth(x, y, angle){
+			let r = Math.sqrt((size*size)/8);
+			ctx.save();
+			ctx.translate(x,y);
+			ctx.rotate(-angle+Math.PI);
+			ctx.fillStyle = "#eee";
+			ctx.shadowOffsetX = 0;
+			ctx.shadowOffsetY = 0;
+			ctx.shadowBlur = 15;
+			ctx.shadowColor = 'rgba(30,30,30,0.2)';
+
+			ctx.beginPath();
+			let sqrt = Math.sqrt(2*r*r);
+			ctx.moveTo(-sqrt, sqrt+2*r - sqrt/2);
+			ctx.arc(-sqrt, sqrt - sqrt/2, r, Math.PI/2, -Math.PI/4, true)
+			ctx.arc(0, 0 - sqrt/2, r, Math.PI-Math.PI/4, Math.PI*2+Math.PI/4); // binkica na koncu
+			ctx.arc(sqrt, sqrt - sqrt/2, r, Math.PI+Math.PI/4, Math.PI/2, true)
+			ctx.lineTo(sqrt, sqrt+2*r - sqrt/2);
+			ctx.closePath();
+			ctx.fill();
+			ctx.restore();
 		}
 
 		function mousemove(e){
