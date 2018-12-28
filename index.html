@@ -8,12 +8,20 @@
 	<style>
 		body{
 			margin: 0;
-			overflow: hidden;
 			background: #f7b731;
+			min-height: 100vh;
+		}
+
+		canvas{
+			position: fixed;
+			top: 0;
+			left: 0;
 		}
 	</style>
 </head>
 <body>
+	Lorem ipsum
+
 	<canvas id="zadrga"></canvas>
 	<script type="text/javascript">
 		CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -34,7 +42,8 @@
 		let ctx = c.getContext("2d");
 
 		let size = 50;
-		let position = 500;
+		let position = 0;
+		let targetPosition = 0;
 		let w, h;
 
 
@@ -146,11 +155,30 @@
 		}
 
 		function mousemove(e){
-			position = e.clientY;
-			render();
+			//position = e.clientY;
+			//render();
+		}
+
+		function mousewheel(e){
+			targetPosition += e.deltaY;
+		}
+
+		function animation(t){
+			position += Math.floor((targetPosition-position)/10);
+			if(position < (h+w/2)){
+				c.style.display = "block";
+				render();
+				requestAnimationFrame(animation);
+			}
+			else{
+				c.style.display = "none";
+			}
 		}
 
 		resize();
+		animation();
+
+		c.onmousewheel = mousewheel;
 		window.onmousemove = mousemove;
 		window.onresize = resize;
 	</script>
