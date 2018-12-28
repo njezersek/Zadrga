@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		body{
+			margin: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="zadrga"></canvas>
+	<script type="text/javascript">
+		let c = document.getElementById("zadrga");
+		let ctx = c.getContext("2d");
+
+		let size = 100;
+		let position = 500;
+		let w, h;
+
+		function resize(){
+			w = c.width = window.innerWidth;
+			h = c.height = window.innerHeight;
+
+			render();
+		}
+
+		function render(){
+			ctx.clearRect(0,0,w,h);
+
+			// pobarvaj ozadje
+			ctx.fillStyle = "#447693"
+			ctx.beginPath();
+			ctx.arc(0, position, w/2, Math.PI, 2*Math.PI);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.arc(w, position, w/2, Math.PI, 2*Math.PI);
+			ctx.fill();
+			ctx.fillRect(0,position, w, h-position);
+
+			let n;
+
+			ctx.lineWidth = size/2;
+			// narisi zobcke zadrge na ravnem delu
+			n = Math.ceil((h-position)/size);
+			for(let i=0; i<n; i++){
+				// leva stran
+				ctx.strokeStyle = "#22a0d6";
+				ctx.beginPath();
+				ctx.moveTo(w/2 - size, h - size*i);
+				ctx.lineTo(w/2 + size, h - size*i);
+				ctx.stroke();
+
+				//desna stran
+				ctx.strokeStyle = "#1885b4";
+				ctx.beginPath();
+				ctx.moveTo(w/2 - size, h - size*(i+.5));
+				ctx.lineTo(w/2 + size, h - size*(i+.5));
+				ctx.stroke();
+			}
+
+			// narisi zobcke zadrge na kroznem delu
+			let clx = 0;
+			let cly = position;
+			let crx = w;
+			let cry = position;
+			let r = w/2;
+			let offeset = n*size - (h-position);
+			let angleOffset = offeset/r;
+			n = (Math.PI*r)/size;
+			for(let i=0; i<n; i++){
+				let angle = Math.PI/2+(Math.PI/n)*i + angleOffset;
+				//leva stran
+				ctx.strokeStyle = "#22a0d6";
+				let sin = Math.sin(angle);
+				let cos = Math.cos(angle);
+				ctx.beginPath();
+				ctx.moveTo(sin*(r-size) + clx, cos*(r-size) + cly);
+				ctx.lineTo(sin*(r+size) + clx, cos*(r+size) + cly);
+				ctx.stroke();
+				//desna stran
+				ctx.strokeStyle = "#1885b4";
+				angle = Math.PI/2+(Math.PI/n)*(i+.5) + angleOffset;
+				sin = Math.sin(-angle);
+				cos = Math.cos(-angle);
+				ctx.beginPath();
+				ctx.moveTo(sin*(r-size) + crx, cos*(r-size) + cry);
+				ctx.lineTo(sin*(r+size) + crx, cos*(r+size) + cry);
+				ctx.stroke();
+			}
+		}
+
+		function mousemove(e){
+			position = e.clientY;
+			render();
+		}
+
+		resize();
+		window.onmousemove = mousemove;
+		window.onresize = resize;
+	</script>
+</body>
+</html>
