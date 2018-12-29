@@ -46,7 +46,8 @@
 		let targetPosition = 0;
 		let w, h;
 
-
+		let running = true;
+		let t2 = 0;
 
 		function render(){
 			//position = 1400;
@@ -97,9 +98,11 @@
 				tooth(sin*(r)+crx, cos*(r)+cry, -angle);
 			}
 
+
 			//narisi colnicek
 			ctx.fillStyle = "#eee";
 			ctx.shadowBlur = 15;
+			ctx.shadowColor = 'rgba(30,30,30,0.2)';
 			ctx.shadowColor = 'rgba(30,30,30,0.2)';
 			ctx.beginPath();
 			ctx.moveTo(w/2, position-size*4);
@@ -160,25 +163,48 @@
 		}
 
 		function mousewheel(e){
-			targetPosition += e.deltaY;
+			var e = window.event || e; // old IE support
+    	var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+			targetPosition += -delta*100;
+			if(!running)animation();
+
+			console.log(delta);
 		}
 
 		function animation(t){
-			position += Math.floor((targetPosition-position)/10);
-			if(position < (h+w/2)){
-				c.style.display = "block";
-				render();
+			//console.log(t-t2);
+			if(t-t2 > 16){
+				t2 = t;
+				position += Math.floor((targetPosition-position)/10);
+					if(position < (h+w/2)){
+						c.style.display = "block";
+						render();
+					}
+				else{
+					c.style.display = "none";
+					running = false;
+				}
+
+			}
+			if(running){
 				requestAnimationFrame(animation);
 			}
-			else{
-				c.style.display = "none";
-			}
+
+			//console.log("running");
 		}
 
 		resize();
 		animation();
 
-		c.onmousewheel = mousewheel;
+		if (c.addEventListener){
+		    // IE9, Chrome, Safari, Opera
+		    c.addEventListener("mousewheel", mousewheel, false);
+		    // Firefox
+		    c.addEventListener("DOMMouseScroll", mousewheel, false);
+		}// IE 6/7/8
+		else{
+		    c.attachEvent("onmousewheel", mousewheel);
+		}
 		window.onmousemove = mousemove;
 		window.onresize = resize;
 	</script>
