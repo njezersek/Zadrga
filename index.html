@@ -168,7 +168,15 @@
 			targetPosition += -delta*100;
 			if(!running)animation();
 
-			console.log(delta);
+			//console.log(delta);
+		}
+
+		function touchmove(e){
+			position = targetPosition = e.touches[0].clientY;
+			if(position > h-100){
+				targetPosition = h+w;
+			}
+			//console.log(e);
 		}
 
 		function animation(t){
@@ -205,7 +213,11 @@
 		else{
 		    c.attachEvent("onmousewheel", mousewheel);
 		}
-		window.onmousemove = mousemove;
+
+		//c.addEventListener("touchstart", touchstart, false);
+	  //c.addEventListener("touchend", touchend, false);
+	  //c.addEventListener("touchcancel", touchend, false);
+	  c.addEventListener("touchmove", touchmove, false);
 		window.onresize = resize;
 	</script>
 </body>
