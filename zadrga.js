@@ -4,10 +4,16 @@ class Zipper{
 		c.style.position = "fixed";
 		c.style.left = "0";
 		c.style.top = "0";
-		document.body.appendChild(c);
+		document.body.insertBefore(c, document.body.firstChild);
 		this.ctx = c.getContext("2d");
+		//tooth canvas
+		this.toothc = document.createElement("canvas");
+		this.toothctx = this.toothc.getContext("2d");
+		//slider canvas
+		this.sliderc = document.createElement("canvas");
+		this.sliderctx = this.sliderc.getContext("2d");
 		// round rect
-		this.ctx.roundRect = function (x, y, w, h, r) {
+		let roundRect = function (x, y, w, h, r) {
 			if (w < 2 * r) r = w / 2;
 			if (h < 2 * r) r = h / 2;
 			//this.beginPath();
@@ -20,6 +26,7 @@ class Zipper{
 			this.closePath();
 			return this;
 		}
+		this.sliderctx.roundRect = roundRect;
 
 		this.w = 0;
 		this.h = 0;
@@ -48,30 +55,46 @@ class Zipper{
 
 	tooth(x, y, angle){
 		let ctx = this.ctx;
+		let size = this.size;
+
+		let r = Math.sqrt((size*size)/8);
+		let sqrt = Math.sqrt(2*r*r);
+
+		ctx.save();
+		ctx.translate(x,y);
+		ctx.rotate(-angle+Math.PI);
+		ctx.drawImage(this.toothc,-size/2-sqrt,-r-size/2-sqrt/2);
+		ctx.restore();
+	}
+
+	renderTooth(){
+		let c = this.toothc;
+		let ctx = this.toothctx;
 		let w = this.w;
 		let h = this.h;
 		let size = this.size;
 		let position = this.position;
 
+		// resize
+		c.width = size*2;
+		c.height = size*2.5;
+
+		ctx.clearRect(0, 0, c.width, c.height);
+
 		let r = Math.sqrt((size*size)/8);
-		ctx.save();
-		ctx.translate(x,y);
-		ctx.rotate(-angle+Math.PI);
 		ctx.fillStyle = "#eee";
-		ctx.shadowBlur = 15;
-		ctx.shadowColor = 'rgba(30,30,30,0.2)';
+		ctx.shadowBlur = size/2;
+		ctx.shadowColor = 'rgba(0,0,0,0.2)';
 
 		ctx.beginPath();
 		let sqrt = Math.sqrt(2*r*r);
-		ctx.moveTo(-sqrt, sqrt+2*r - sqrt/2);
-		ctx.arc(-sqrt, sqrt - sqrt/2, r, Math.PI/2, -Math.PI/4, true);
-		ctx.arc(0, 0 - sqrt/2, r, Math.PI-Math.PI/4, Math.PI*2+Math.PI/4); // binkica na koncu
-		ctx.arc(sqrt, sqrt - sqrt/2, r, Math.PI+Math.PI/4, Math.PI/2, true);
-		ctx.lineTo(sqrt, sqrt+2*r - sqrt/2);
+		ctx.moveTo(size/2, 					size/2 + r +sqrt+2*r);
+		ctx.arc(size/2, 						size/2 + r +sqrt, 		r, Math.PI/2, -Math.PI/4, true);
+		ctx.arc(size/2 + sqrt, 			size/2 + r +0,			 	r, Math.PI-Math.PI/4, Math.PI*2+Math.PI/4); // bunkica na koncu
+		ctx.arc(size/2 +sqrt*2, 		size/2 + r +sqrt, 		r, Math.PI+Math.PI/4, Math.PI/2, true);
+		ctx.lineTo(size/2 +sqrt*2, 	size/2 + r +sqrt+2*r);
 		ctx.closePath();
-
 		ctx.fill();
-		ctx.restore();
 	}
 
 	slider(){
@@ -80,30 +103,47 @@ class Zipper{
 		let h = this.h;
 		let size = this.size;
 		let position = this.position;
+
+		ctx.drawImage(this.sliderc, w/2-size*2.5, position-size*4.5)
+	}
+
+	renderSlider(){
+		let c = this.sliderc;
+		let ctx = this.sliderctx;
+		let w = this.w;
+		let h = this.h;
+		let size = this.size;
+		let position = this.position;
+
+		// resize
+		c.width = size*5;
+		c.height = size*8;
+
+		ctx.clearRect(0, 0, c.width, c.height);
 		//narisi colnicek
 		ctx.fillStyle = "#eee";
-		ctx.shadowBlur = 15;
-		ctx.shadowColor = 'rgba(30,30,30,0.2)';
-		ctx.shadowColor = 'rgba(30,30,30,0.2)';
+		ctx.shadowBlur = size/2;
+		ctx.shadowColor = 'rgba(0,0,0,0.2)';
+		ctx.shadowColor = 'rgba(0,0,0,0.2)';
 		ctx.beginPath();
-		ctx.moveTo(w/2, position-size*4);
-		ctx.lineTo(w/2+size*2, position-size*3.3);
-		ctx.lineTo(w/2+size*1.5, position);
-		ctx.lineTo(w/2-size*1.5, position);
-		ctx.lineTo(w/2-size*2, position-size*3.3);
+		ctx.moveTo(size*2.5, size*0.5); // w/2, position-size*4
+		ctx.lineTo(size*4.5, size*1.2); // w/2+size*2, position-size*3.3
+		ctx.lineTo(size*4, size*4.5);		// w/2+size*1.5, position
+		ctx.lineTo(size*1, size*4.5);		// w/2-size*1.5, position
+		ctx.lineTo(size*0.5, size*1.4);
 		ctx.closePath();
 		ctx.fill();
 
 		//rocaj colnicka
 		ctx.beginPath();
-		ctx.roundRect(w/2-size*.6, position-size*1.4, size*1.2, size*1.5,size/4);
-		ctx.roundRect(w/2-size*1.2, position-size*2, size*2.4, size*5,size/2);
+		ctx.roundRect(size*2.5-size*.6, size*4.5-size*1.4, size*1.2, size*1.5,size/4);
+		ctx.roundRect(size*2.5-size*1.2, size*4.5-size*2, size*2.4, size*5,size/2);
 		ctx.closePath();
 		ctx.fill("evenodd");
 
 		//
 		ctx.beginPath();
-		ctx.roundRect(w/2-size*.3, position-size*3.5, size*.6, size*3, size/2);
+		ctx.roundRect(size*2.5-size*.3, size*4.5-size*3.5, size*.6, size*3, size/2);
 		ctx.closePath();
 		ctx.fill();
 	}
@@ -199,6 +239,8 @@ class Zipper{
 		this.w = this.c.width = window.innerWidth;
 		this.h = this.c.height = window.innerHeight;
 		this.size = Math.min(this.w,this.h)/20;
+		this.renderTooth();
+		this.renderSlider();
 		this.render();
 	}
 }
